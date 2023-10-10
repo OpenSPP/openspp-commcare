@@ -17,10 +17,7 @@
         "g2p_registry_membership",
         "g2p_programs",
         "g2p_bank",
-        "queue_job",
-        "base_rest",
-        "component",
-        "extendable",
+        "auth_api_key",
     ],
     "external_dependencies": {"python": []},
     'data': [
