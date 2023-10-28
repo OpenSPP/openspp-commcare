@@ -1,0 +1,3 @@
+- right now, if using werkeuz, if the request fail, it return a 200, with the error in JSON. That make commcare think it worked
+- properly configure access rights and groups
+- manage form processing status (new, done, error)

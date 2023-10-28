@@ -1,4 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-spp_commcare.access_spp_commcare_case,access_spp_commcare_case,model_spp_commcare_case,base.group_user,1,0,0,0
-spp_commcare.access_spp_commcare_form,access_spp_commcare_form,model_spp_commcare_form,base.group_user,1,0,0,0
-spp_commcare.access_spp_commcare_form_metadata,access_spp_commcare_form_metadata,model_spp_commcare_form_metadata,base.group_user,1,0,0,0
+spp_commcare.access_spp_commcare_case,access_spp_commcare_case,model_spp_commcare_case,base.group_user,1,1,1,1
+spp_commcare.access_spp_commcare_form,access_spp_commcare_form,model_spp_commcare_form,base.group_user,1,1,1,1
+spp_commcare.access_spp_commcare_form_metadata,access_spp_commcare_form_metadata,model_spp_commcare_form_metadata,base.group_user,1,1,1,1
+

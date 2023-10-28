@@ -20,7 +20,7 @@ RESERVED_PROPERTY_NAME = [
     "@uiVersion",
     "@name",
     "#type",
-    "_form_type",
+    "spp_form_type",
 ]
 
 class CommCareForm(models.Model):
@@ -30,6 +30,7 @@ class CommCareForm(models.Model):
     # Basic Info
     app_id = fields.Char(string='App ID', required=True, index=True)
     build_id = fields.Char(string='Build ID')
+    form_id = fields.Char(string='Form ID')
     domain = fields.Char(string='Domain', required=True)
     archived = fields.Boolean(string='Archived', default=False)
     form_name = fields.Char(string='Form Name')
@@ -61,7 +62,7 @@ class CommCareForm(models.Model):
             print(form.form_name)
             if form.form_name == 'Register New Group':
                 is_group = True
-            elif form.form_name != 'Add New Member':
+            elif form.form_name != 'Register New Member':
                 continue  # Skip to the next iteration if form_name doesn't match
 
             # Set the is_group flag
@@ -89,7 +90,8 @@ class CommCareForm(models.Model):
 
             print(partner_data)
             # TODO: FIX! find why it is not recomputed
-            partner_data['name'] = "plop"
+            if not is_group:
+                partner_data['name'] = "plop"
             # Create new res.partner record with mapped fields
             if partner_data:  # Only create if there's data to insert
                 partner = self.env['res.partner'].create(partner_data)
@@ -107,10 +109,10 @@ class CommCareForm(models.Model):
             # Extract properties from stored JSON
             properties_json = form.properties
             properties = json.loads(properties_json)
-            if not '_form_type' in properties or not properties['_form_type'].startswith("spp.event."):
+            if not 'spp_form_type' in properties or not properties['spp_form_type'].startswith("spp.event."):
                 # Not an event_data form type
                 continue
-            form_type = properties['_form_type']
+            form_type = properties['spp_form_type']
             form_fields = self.env[form_type]._fields.keys()
 
             related_case = self._get_related_case(properties)
@@ -136,8 +138,8 @@ class CommCareForm(models.Model):
             }
             event_data = self.env["spp.event.data"].create(vals_event_data)
 
-    def _get_related_case(self, properties):
-        if 'subcase_0' in properties.keys():
+    def _get_related_case(self, properties, parent_case=False):
+        if 'subcase_0' in properties.keys() and not parent_case:
             # This is used for individuals
             case_data = properties['subcase_0']["case"]
         else:
@@ -150,10 +152,14 @@ class CommCareForm(models.Model):
 
     def _associate_individual_with_group(self, form, individual):
         # TODO: Check of the group membership app is installed
+        print("_associate_individual_with_group")
         properties = json.loads(form.properties)
+        print(properties)
 
-        group_case = self._get_related_case(properties)
+        group_case = self._get_related_case(properties, parent_case=True)
+        print(f"group_case: {group_case} ({group_case and group_case.partner_id})")
         if group_case and group_case.partner_id:
+            print("create g2p.group.membership")
             self.env["g2p.group.membership"].create({
                 'group': group_case.partner_id.id,
                 'individual': individual.id
@@ -184,13 +190,17 @@ class CommCareForm(models.Model):
             }
             case = self.env['spp.commcare.case'].create(case_data)
         else:
-            print("PartnerId %s" % existing_case.partner_id)
-            if not existing_case.partner_id.id:
-                existing_case.write({
-                    "partner_id": partner.id
-                })
-            elif existing_case.partner_id.id != partner.id:
-                raise Exception("Unexpected existing_case.partner_id != partner.id")
+            # TODO fix this: we should not have new partner created for the same case, we just do it for testing
+            # print("PartnerId %s" % existing_case.partner_id)
+            # if not existing_case.partner_id.id:
+            #     existing_case.write({
+            #         "partner_id": partner.id
+            #     })
+            # elif existing_case.partner_id.id != partner.id:
+            #     raise Exception(f"Unexpected existing_case.partner_id({existing_case.partner_id.id}) != partner.id ({partner.id})")
+            existing_case.write({
+                "partner_id": partner.id
+            })
 
     def _convert_commcare_date(self, date_str):
         if not date_str:
@@ -217,37 +227,59 @@ class CommCareForm(models.Model):
         else:
             case = None
 
-        form_data = {
-            'app_id': form_json.get('app_id'),
-            'build_id': form_json.get('build_id'),
-            'domain': form_json.get('domain'),
+        # TODO: Decide if we store multiple instance of the same form ID. It might be a good idea for audit purpose.
+        form = []
+        # form = self.env['spp.commcare.form'].search([('form_id', '=', form_json.get('id'))])
+
+        form_data = {}
+        if len(form) == 0:
+            form = None
+            form_data = {
+                'app_id': form_json.get('app_id'),
+                'build_id': form_json.get('build_id'),
+                'form_id': form_json.get('id'),
+                'domain': form_json.get('domain'),
+                'form_name': form_json['form'].get('@name'),
+                'form_type': form_json['form'].get('#type'),
+            }
+
+        form_data.update({
             'archived': form_json.get('archived', False),
-            'form_name': form_json['form'].get('@name'),
-            'form_type': form_json['form'].get('#type'),
             'edited_on': self._convert_commcare_date(form_json.get('edited_on')),
             'received_on': self._convert_commcare_date(form_json.get('received_on')),
             'server_modified_on': self._convert_commcare_date(form_json.get('server_modified_on')),
             'properties': json.dumps(form_json.get('form', {})),
             'case_id': case
-        }
+        })
         print(form_data)
 
-        # Create metadata
-        metadata_data = form_json.get('metadata', {})
-        # temp
-        del metadata_data['location']
-        print(metadata_data)
-        metadata_data['timeEnd'] = self._convert_commcare_date(metadata_data['timeEnd'])
-        metadata_data['timeStart'] = self._convert_commcare_date(metadata_data['timeStart'])
-        metadata = self.sudo().env['spp.commcare.form.metadata'].create(metadata_data)
+        # TODO: Check if metadata already exists and update if so
+        if form is None:
+            # Create metadata
+            metadata_data = form_json.get('metadata', {})
+            # temp
+            del metadata_data['location']
+            print(metadata_data)
+            metadata_data['timeEnd'] = self._convert_commcare_date(metadata_data['timeEnd'])
+            metadata_data['timeStart'] = self._convert_commcare_date(metadata_data['timeStart'])
+            metadata = self.env['spp.commcare.form.metadata'].create(metadata_data)
 
-        # Associate metadata with form
-        form_data['metadata_id'] = metadata.id
+            # Associate metadata with form
+            form_data['metadata_id'] = metadata.id
 
-        # Create the form and return
-        new_form = self.sudo().env['spp.commcare.form'].create(form_data)
-        # new_form.create_partner_from_form()
-        return new_form
+        if form:
+            form.write(form_data)
+            return form
+        else:
+            form = self.env['spp.commcare.form'].create(form_data)
+        # form.create_partner_from_form()
+
+        spp_form_type = form_json.get('form', {}).get('spp_form_type', None)
+        if spp_form_type:
+            form.create_event_data_from_form()
+        else:
+            form.create_partner_from_form()
+        return form
 
 
 class CommCareFormMetadata(models.Model):
