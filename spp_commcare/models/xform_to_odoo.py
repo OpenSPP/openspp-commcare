@@ -1,3 +1,5 @@
+import json
+
 from odoo import api, models, fields, exceptions
 import xml.etree.ElementTree as ET
 from lxml import etree
@@ -167,7 +169,7 @@ class XFormToOdoo(models.TransientModel):
     def _traverse_element(self, element, json_dict):
         for child in element:
             tag = child.tag.split('}')[-1]
-            if child.attrib.get('jr:template') is not None:
+            if child.attrib.get('{http://openrosa.org/javarosa}template') is not None:
                 json_dict[tag] = [self._traverse_element(child, {})]
             else:
                 json_dict[tag] = self._traverse_element(child, {})
@@ -175,16 +177,20 @@ class XFormToOdoo(models.TransientModel):
 
     def _update_json_structure(self, element, json_dict, field_types):
         for child in element:
+            print("child.tag: ", child.tag)
+            print("child.attrib: ", child.attrib)
             tag = child.tag.split('}')[-1]
             field_info = {
                 "type": field_types.get(tag, "unknown"),
-                "relationship": None,
-                "select_options": None
+                # "relationship": None,
+                # "select_options": None
             }
-            if child.attrib.get('jr:template') is not None:
+            if child.attrib.get('{http://openrosa.org/javarosa}template') is not None:
+                print("jr:template found")
                 json_dict[tag] = {
                     "type": "list",
-                    "items": [self._update_json_structure(child, {}, field_types)]
+                    "_model_name": tag,
+                    "_items": self._update_json_structure(child, {}, field_types)
                 }
             else:
                 json_dict[tag] = self._update_json_structure(child, field_info, field_types)
@@ -194,7 +200,14 @@ class XFormToOdoo(models.TransientModel):
         keys = ref_path.split('/')[2:]
         temp_dict = json_dict
         for key in keys:
-            temp_dict = temp_dict.get(key, {})
+            if key in temp_dict:
+                temp_dict = temp_dict.get(key, {})
+            else:
+                if "_items" in temp_dict:
+                    temp_dict = temp_dict["_items"].get(key, {})
+                else:
+                    temp_dict = None
+
         if temp_dict is not None:
             temp_dict["select_options"] = select_options
 
@@ -220,7 +233,10 @@ class XFormToOdoo(models.TransientModel):
 
     def _update_json_with_translations(self, json_dict, translations, current_path=[]):
         for key, value in json_dict.items():
-            new_path = current_path + [key]
+            if key == "_items":
+                new_path = current_path
+            else:
+                new_path = current_path + [key]
             field_id = "/".join(new_path) + "-label"  # Use forward slash (/) instead of hyphen (-)
             label_translations = translations.get(field_id)
             if label_translations:
@@ -259,6 +275,7 @@ class XFormToOdoo(models.TransientModel):
         for select_element in body_element.xpath('.//xf:select1', namespaces=self._xform_namespaces):
             ref = select_element.get('ref')
             select_options = self._extract_select_options_manual(select_element)
+
             self._update_select_options_in_json(json_structure, ref, select_options)
 
         translations = self._extract_translations(model_element)
