@@ -30,8 +30,10 @@ class CommCareCase(models.Model):
     # Link to the res.partner model
     partner_id = fields.Many2one('res.partner', string='Associated Partner')
 
+    is_partial = fields.Boolean(string="Is Partially filled", default=False)
+
     @api.model
-    def link_case_to_partner(self):
+    def link_case_to_partner(self, partner=None):
         # Step 1: Deserialize properties to Python dictionary
         properties_dict = json.loads(self.properties)
 
@@ -85,7 +87,7 @@ class CommCareCase(models.Model):
                                                          order='create_date desc', limit=1)
 
         # If a case exists, decide whether to update it
-        if existing_case:
+        if existing_case and not existing_case.is_partial:
             existing_date_str = existing_case.date_modified
             new_date_str = case_data['date_modified']
 
@@ -119,10 +121,13 @@ class CommCareCase(models.Model):
 
                 case_data['parent_id'] = parent_case.id
 
-            # Create the new case record in Odoo and return it
-            new_case = self.env['spp.commcare.case'].create(case_data)
+            if existing_case:
+                existing_case.write(case_data)
+                return existing_case
+            else:
+                # Create the new case record in Odoo and return it
+                new_case = self.env['spp.commcare.case'].create(case_data)
 
-            # Link case to partner after creation
-            new_case.link_case_to_partner()
-
-            return new_case
+                # Link case to partner after creation
+                new_case.link_case_to_partner()
+                return new_case
