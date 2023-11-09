@@ -5,7 +5,7 @@
     "version": "15.0.0.0.0",
     "sequence": 1,
     "author": "OpenSPP.org",
-    "website": "https://github.com/openspp/openspp-commcare",
+    "website": "https://github.com/openspp/openspp-registry",
     "license": "LGPL-3",
     "development_status": "Alpha",
     "maintainers": ["jeremi", "gonzalesedwin1123"],
@@ -20,8 +20,8 @@
         "auth_api_key",
     ],
     "external_dependencies": {"python": []},
-    'data': [
-        'security/ir.model.access.csv',
+    "data": [
+        "security/ir.model.access.csv",
     ],
     "assets": {},
     "demo": [],
