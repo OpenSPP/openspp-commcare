@@ -9,6 +9,8 @@ from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 class CommCareCase(models.Model):
     _name = "spp.commcare.case"
     _description = "CommCare Cases"
+    _rec_name = "case_id"
+    _order = "id desc"
 
     # Fixed fields
     domain = fields.Char(required=True)

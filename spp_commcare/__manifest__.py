@@ -22,6 +22,10 @@
     "external_dependencies": {"python": []},
     "data": [
         "security/ir.model.access.csv",
+        "views/main_view.xml",
+        "views/commcare_form_views.xml",
+        "views/commcare_form_metadata_views.xml",
+        "views/commcare_case_views.xml",
     ],
     "assets": {},
     "demo": [],

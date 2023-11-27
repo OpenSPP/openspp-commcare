@@ -1,0 +1,108 @@
+<!--
+   Part of OpenSPP Commcare. See LICENSE file for full copyright and licensing details.
+-->
+<odoo>
+    <record id="view_commcare_form_metadata_tree" model="ir.ui.view">
+        <field name="name">view_commcare_form_metadata_tree</field>
+        <field name="model">spp.commcare.form.metadata</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <tree duplicate="0" create="0" delete="0" edit="0">
+                <field name="appVersion" />
+                <field name="app_build_version" />
+                <field name="commcare_version" />
+                <field name="deviceID" />
+                <field name="drift" />
+                <field name="geo_point" />
+                <field name="instanceID" />
+                <field name="timeEnd" />
+                <field name="timeStart" />
+                <field name="userID" />
+                <field name="username" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_commcare_form_metadata_form" model="ir.ui.view">
+        <field name="name">view_commcare_form_metadata_form</field>
+        <field name="model">spp.commcare.form.metadata</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form string="Commcare Form Metadata" duplicate="0" create="0" delete="0" edit="0">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                    </div>
+                    <div class="oe_title mb24">
+                        <h1>
+                            <field name="instanceID" />
+                        </h1>
+                        <div class="o_row">
+                        </div>
+                    </div>
+                    <group colspan="4" col="4">
+                        <field name="appVersion" />
+                        <field name="app_build_version" />
+                        <field name="commcare_version" />
+                        <field name="deviceID" />
+                        <field name="drift" />
+                        <field name="geo_point" />
+                        <field name="timeEnd" />
+                        <field name="timeStart" />
+                        <field name="userID" />
+                        <field name="username" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_commcare_form_metadata_filter" model="ir.ui.view">
+        <field name="name">view_commcare_form_metadata_filter</field>
+        <field name="model">spp.commcare.form.metadata</field>
+        <field name="arch" type="xml">
+            <search string="Search Commcare Formd Metadata">
+                <field name="instanceID" />
+                <field name="appVersion" filter_domain="[('appVersion', 'ilike', self)]" />
+            </search>
+        </field>
+    </record>
+
+    <record id="action_commcare_form_metadata" model="ir.actions.act_window">
+        <field name="name">Commcare Form Metadata</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">spp.commcare.form.metadata</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_commcare_form_metadata_filter" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Commcare Forms Metadata
+            </p><p>
+                List of commcare forms metadata.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_commcare_form_metadata_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1" />
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_commcare_form_metadata_tree" />
+        <field name="act_window_id" ref="action_commcare_form_metadata" />
+    </record>
+
+    <record id="action_commcare_form_metadata_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1" />
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_commcare_form_metadata_form" />
+        <field name="act_window_id" ref="action_commcare_form_metadata" />
+    </record>
+
+    <menuitem
+        id="menu_commcare_form_metadata"
+        name="Forms Metadata"
+        action="action_commcare_form_metadata"
+        parent="spp_commcare_configuration_menu_root"
+        sequence="10"
+        groups="g2p_registry_base.group_g2p_admin"
+    />
+
+</odoo>

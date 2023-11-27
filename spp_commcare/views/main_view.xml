@@ -1,0 +1,15 @@
+<!--
+   Part of OpenSPP Commcare. See LICENSE file for full copyright and licensing details.
+-->
+<odoo>
+    <!-- Top menu item -->
+    <menuitem id="spp_commcare_main_menu_root" name="Commcare" active="True" sequence="-1" />
+
+    <menuitem
+        id="spp_commcare_configuration_menu_root"
+        name="Configuration"
+        parent="spp_commcare_main_menu_root"
+        sequence="1000"
+    />
+
+</odoo>

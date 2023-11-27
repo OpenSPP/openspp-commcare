@@ -1,0 +1,123 @@
+<!--
+   Part of OpenSPP Commcare. See LICENSE file for full copyright and licensing details.
+-->
+<odoo>
+    <record id="view_commcare_form_tree" model="ir.ui.view">
+        <field name="name">view_commcare_form_tree</field>
+        <field name="model">spp.commcare.form</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="archived == True" duplicate="0" create="0" delete="0" edit="0">
+                <field name="app_id" />
+                <field name="build_id" />
+                <field name="form_id" />
+                <field name="domain" />
+                <field name="form_name" />
+                <field name="form_type" />
+                <field name="edited_on" />
+                <field name="received_on" />
+                <field name="server_modified_on" />
+                <field name="case_id" options="{'no_open':True,'no_create':True,'no_create_edit':True}" />
+                <field name="metadata_id" options="{'no_open':True,'no_create':True,'no_create_edit':True}" />
+                <field name="archived" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_commcare_form_form" model="ir.ui.view">
+        <field name="name">view_commcare_form_form</field>
+        <field name="model">spp.commcare.form</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form string="Commcare Form" duplicate="0" create="0" delete="0" edit="0">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                    </div>
+                    <widget
+                        name="web_ribbon"
+                        title="Archived"
+                        bg_color="bg-danger"
+                        attrs="{'invisible': [('archived', '=', False)]}"
+                    />
+                    <div class="oe_title mb24">
+                        <h1>
+                            <field name="app_id" />
+                        </h1>
+                        <div class="o_row">
+                        </div>
+                    </div>
+                    <group colspan="4" col="4">
+                        <field name="build_id" />
+                        <field name="form_id" />
+                        <field name="domain" />
+                        <field name="archived" />
+                        <field name="form_name" />
+                        <field name="form_type" />
+                        <field name="edited_on" />
+                        <field name="received_on" />
+                        <field name="server_modified_on" />
+                        <field name="case_id" options="{'no_create':True,'no_create_edit':True}" />
+                        <field name="metadata_id" options="{'no_create':True,'no_create_edit':True}" />
+                        <field name="properties" colspan="4" />
+                    </group>
+                    <field name="archived" invisible="1" />
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_commcare_form_filter" model="ir.ui.view">
+        <field name="name">view_commcare_form_filter</field>
+        <field name="model">spp.commcare.form</field>
+        <field name="arch" type="xml">
+            <search string="Search Commcare Forms">
+                <field name="app_id" />
+                <field name="domain" filter_domain="[('domain', 'ilike', self)]" />
+                <field name="form_id" />
+                <field name="form_name" filter_domain="[('form_name', 'ilike', self)]" />
+                <field name="form_type" filter_domain="[('form_type', 'ilike', self)]" />
+                <separator />
+                <filter string="Archived" name="archived" domain="[('archived', '=', True)]" />
+            </search>
+        </field>
+    </record>
+
+    <record id="action_commcare_form" model="ir.actions.act_window">
+        <field name="name">Commcare Form</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">spp.commcare.form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_commcare_form_filter" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Commcare Forms
+            </p><p>
+                List of commcare forms.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_commcare_form_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1" />
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_commcare_form_tree" />
+        <field name="act_window_id" ref="action_commcare_form" />
+    </record>
+
+    <record id="action_commcare_form_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1" />
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_commcare_form_form" />
+        <field name="act_window_id" ref="action_commcare_form" />
+    </record>
+
+    <menuitem
+        id="menu_commcare_form"
+        name="Forms"
+        action="action_commcare_form"
+        parent="spp_commcare_main_menu_root"
+        sequence="10"
+        groups="g2p_registry_base.group_g2p_admin"
+    />
+
+</odoo>

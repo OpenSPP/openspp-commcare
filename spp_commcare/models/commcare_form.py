@@ -30,6 +30,8 @@ RESERVED_PROPERTY_NAME = [
 class CommCareForm(models.Model):
     _name = "spp.commcare.form"
     _description = "CommCare Forms"
+    _rec_name = "app_id"
+    _order = "id desc"
 
     # Basic Info
     app_id = fields.Char(string="App ID", required=True, index=True)
@@ -66,7 +68,7 @@ class CommCareForm(models.Model):
             _logger.info(form.form_name)
             if form.form_name == "Register New Group":
                 is_group = True
-            elif form.form_name != "Register New Member":
+            elif form.form_name != "Add New Member":
                 continue  # Skip to the next iteration if form_name doesn't match
 
             # Set the is_group flag
@@ -93,12 +95,15 @@ class CommCareForm(models.Model):
                     partner_data[key] = value
 
             _logger.info(partner_data)
-            # TODO: FIX! find why it is not recomputed
             if not is_group:
-                partner_data["name"] = "plop"
+                # name field is mandatory so assign temporary value here
+                partner_data["name"] = "temporary"
             # Create new res.partner record with mapped fields
             if partner_data:  # Only create if there's data to insert
                 partner = self.env["res.partner"].create(partner_data)
+                # Generate individual name field value
+                partner.name_change()
+
                 self._associate_case_with_partner(form, partner)
                 if not is_group:
                     self._associate_individual_with_group(form, partner)
@@ -303,6 +308,8 @@ class CommCareForm(models.Model):
 class CommCareFormMetadata(models.Model):
     _name = "spp.commcare.form.metadata"
     _description = "CommCare Form Metadata"
+    _rec_name = "instanceID"
+    _order = "id desc"
 
     # Metadata Fields
     appVersion = fields.Char(string="App Version")
