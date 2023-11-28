@@ -86,9 +86,8 @@ class CommCareForm(models.Model):
                 # Get key from field mapping config
                 key = self._get_field_map(key, form.form_name)
 
-                # TODO: Fix dirty hardcod fix. Make it an extendable function.
-                if key == "gender" and value is not None:
-                    value = value[0].upper() + value[1:].lower()
+                # Check value for key and update if necessary
+                value = self._check_key_value(key, value)
 
                 if key in partner_fields:
                     partner_data[key] = value
@@ -112,7 +111,7 @@ class CommCareForm(models.Model):
     def _get_field_map(self, key, form_name):
         """
         Map the key (commcare field) with openspp_field based on field mapping configuration
-        :param key: String - commcare field value
+        :param key: String - commcare field name
         :param form_name: String - commcare form name
         :return: String - key value
         """
@@ -122,7 +121,19 @@ class CommCareForm(models.Model):
             spp_field = form[0].field_ids.filtered(lambda a: a.commcare_field == key)
             if spp_field:
                 retval = spp_field.mapped("openspp_field")[0]
-        _logger.info("DEBUG: _get_field_map: %s" % retval)
+        return retval
+
+    def _check_key_value(self, key, value):
+        """
+        Extendable function to support checking and updating key values
+        :param key: String - commcare field name
+        :param value: String - commcare form name
+        :return: key field value
+        """
+        retval = value
+        if key == "gender" and value is not None:
+            retval = value[0].upper() + value[1:].lower()
+        _logger.info("DEBUG: _check_key_value: %s" % retval)
         return retval
 
     @api.model
