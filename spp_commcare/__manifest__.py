@@ -26,6 +26,7 @@
         "views/commcare_form_views.xml",
         "views/commcare_form_metadata_views.xml",
         "views/commcare_case_views.xml",
+        "views/commcare_field_map_views.xml",
     ],
     "assets": {},
     "demo": [],
