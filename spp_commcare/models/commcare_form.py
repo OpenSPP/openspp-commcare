@@ -83,12 +83,11 @@ class CommCareForm(models.Model):
             for key, value in properties.items():
                 if key in RESERVED_PROPERTY_NAME:
                     continue
-                # TODO: Fix dirty hardcod fix
-                if key == "first_name":
-                    key = "given_name"
-                elif key == "last_name":
-                    key = "family_name"
-                elif key == "gender" and value is not None:
+                # Get key from field mapping config
+                key = self._get_field_map(key, form.form_name)
+
+                # TODO: Fix dirty hardcod fix. Make it an extendable function.
+                if key == "gender" and value is not None:
                     value = value[0].upper() + value[1:].lower()
 
                 if key in partner_fields:
@@ -109,6 +108,22 @@ class CommCareForm(models.Model):
                     self._associate_individual_with_group(form, partner)
             else:
                 _logger.info("No partner data found")
+
+    def _get_field_map(self, key, form_name):
+        """
+        Map the key (commcare field) with openspp_field based on field mapping configuration
+        :param key: String - commcare field value
+        :param form_name: String - commcare form name
+        :return: String - key value
+        """
+        retval = key
+        form = self.env["spp.commcare.field.map"].search([("name", "=", form_name)])
+        if form:
+            spp_field = form[0].field_ids.filtered(lambda a: a.commcare_field == key)
+            if spp_field:
+                retval = spp_field.mapped("openspp_field")[0]
+        _logger.info("DEBUG: _get_field_map: %s" % retval)
+        return retval
 
     @api.model
     def create_event_data_from_form(self):

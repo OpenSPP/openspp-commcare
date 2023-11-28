@@ -26,6 +26,7 @@ class CommCareFieldMappingFields(models.Model):
 
     _name = "spp.commcare.field.map.fields"
     _description = "Commcare Field Mapping Fields"
+    _order = "id"
 
     def _default_model(self):
         return self.map_id.model_id.id

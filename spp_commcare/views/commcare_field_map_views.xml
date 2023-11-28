@@ -38,7 +38,7 @@
                     </div>
                     <group string="Field Mappings">
                         <field name="field_ids" context="{'default_model_id':model_id}" nolabel="1">
-                            <tree editable="top">
+                            <tree editable="bottom">
                                 <field name="model_id" invisible="1" />
                                 <field name="commcare_field" />
                                 <field name="openspp_field" />
