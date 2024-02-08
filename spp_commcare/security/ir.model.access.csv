@@ -2,4 +2,8 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 spp_commcare.access_spp_commcare_case,access_spp_commcare_case,model_spp_commcare_case,base.group_user,1,1,1,1
 spp_commcare.access_spp_commcare_form,access_spp_commcare_form,model_spp_commcare_form,base.group_user,1,1,1,1
 spp_commcare.access_spp_commcare_form_metadata,access_spp_commcare_form_metadata,model_spp_commcare_form_metadata,base.group_user,1,1,1,1
+access_spp_commcare_field_map,SPP Commcare Field Mapping User Access,model_spp_commcare_field_map,base.group_user,1,0,0,0
+access_spp_commcare_field_map_fields,SPP Commcare Field Mapping Fields User Access,model_spp_commcare_field_map_fields,base.group_user,1,0,0,0
 
+access_spp_commcare_field_map_admin,SPP Commcare Field Mapping System Admin Access,model_spp_commcare_field_map,g2p_registry_base.group_g2p_admin,1,1,1,1
+access_spp_commcare_field_map_fields_admin,SPP Commcare Field Mapping Fields System Admin Access,model_spp_commcare_field_map_fields,g2p_registry_base.group_g2p_admin,1,1,1,1
