@@ -37,7 +37,7 @@
                         name="web_ribbon"
                         title="Partially Filled"
                         bg_color="bg-danger"
-                        attrs="{'invisible': [('is_partial', '=', False)]}"
+                        invisible="not is_partial"
                     />
                     <div class="oe_title mb24">
                         <h1>

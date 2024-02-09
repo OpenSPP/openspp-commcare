@@ -5,12 +5,8 @@ from odoo import http
 
 _logger = logging.getLogger(__name__)
 
-_logger.info("Hello world! CommCareController")
-
 
 class CommCareController(http.Controller):
-
-    # @http.route('/commcare/form/', methods=['GET'], type='http', auth='api_key')
     @http.route("/commcare/form/", methods=["GET"], type="http", auth="api_key")
     def get_sample(self, **kwargs):
         return json.dumps({"success": True})
@@ -21,7 +17,7 @@ class CommCareController(http.Controller):
     def create_form(self, **kwargs):
         _logger.info("Hello world! CommCareController create_form")
         CommCareForm = http.request.env["spp.commcare.form"]
-        form_data = http.request.jsonrequest
+        form_data = http.request.get_json_data()
 
         if not form_data:
             return {"error": "No valid data received"}

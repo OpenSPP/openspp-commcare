@@ -253,6 +253,7 @@ class CommCareForm(models.Model):
 
     @api.model
     def create_form_from_json(self, form_json):
+        _logger.info("DEBUG: commcare_form.py: create_form_from_json: %s" % form_json)
         primary_case = form_json.get("form", {}).get("case", {})
         primary_case_id = primary_case.get("@case_id", None)
         if primary_case_id:
